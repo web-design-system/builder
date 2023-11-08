@@ -5,7 +5,10 @@
       <div v-if="snippet" class="builder__preview" v-html="snippet"></div>
       <div v-if="!snippet" class="builder__greeting">
         <h1>Let's get started!</h1>
-        <p>Add instructions below to create or update the current markup.<br>Using Tailwind 2 for styles</p>
+        <p>
+          Add instructions below to create or update the current markup.<br />Using
+          Tailwind 2 for styles
+        </p>
       </div>
     </div>
     <div class="builder__instruction">
@@ -19,6 +22,9 @@
         <span v-if="running" class="material-icons animate-spin">refresh</span>
         <span v-else class="material-icons">send</span>
       </button>
+      <button v-if="history.length" class="builder__btn" @click="undo">
+        <span class="material-icons">undo</span>
+      </button>
     </div>
   </div>
 </template>
@@ -30,8 +36,21 @@ import generateHtmlFromInput from "https://aifn.run/fn/08d5dd80-9dc2-4ca2-9354-b
 
 const input = ref("");
 const snippet = ref("");
+const history = ref<Array<{ s: string; i: string }>>([]);
 const running = ref(false);
 const height = computed(() => input.value.split("\n").length + 1);
+
+async function undo() {
+  const list = history.value;
+
+  if (!list.length) {
+    return;
+  }
+
+  const previous = list.pop()!;
+  snippet.value = previous.s;
+  input.value = previous.i;
+}
 
 async function apply() {
   running.value = true;
@@ -48,6 +67,7 @@ async function apply() {
 
   if (code) {
     snippet.value = sanitize(code);
+    history.value.push({ s: snippet.value, i: input.value });
   }
 
   input.value = "";
