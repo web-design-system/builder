@@ -1,11 +1,12 @@
 <template>
   <div class="builder">
     <div class="builder__canvas">
-      <code
-        class="builder__code"
-        >{{ snippet }}</code
-      >
-      <div class="builder__preview" v-html="snippet"></div>
+      <code v-if="snippet" class="builder__code">{{ snippet }}</code>
+      <div v-if="snippet" class="builder__preview" v-html="snippet"></div>
+      <div v-if="!snippet" class="builder__greeting">
+        <h1>Let's get started!</h1>
+        <p>Add instructions below to create or update the current markup.<br>Using Tailwind 2 for styles</p>
+      </div>
     </div>
     <div class="builder__instruction">
       <textarea
@@ -30,7 +31,7 @@ import generateHtmlFromInput from "https://aifn.run/fn/08d5dd80-9dc2-4ca2-9354-b
 const input = ref("");
 const snippet = ref("");
 const running = ref(false);
-const height = computed(() => Math.min(input.value.split("\n").length + 1, 1));
+const height = computed(() => input.value.split("\n").length + 1);
 
 async function apply() {
   running.value = true;
