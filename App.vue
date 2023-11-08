@@ -50,28 +50,32 @@ async function undo() {
   const previous = list.pop()!;
   snippet.value = previous.s;
   input.value = previous.i;
+  running.value = false;
 }
 
 async function apply() {
   running.value = true;
   let code = snippet.value;
 
-  if (code) {
-    code = await buildHtmlComponent({
-      snippet: code,
-      input: input.value,
-    });
-  } else {
-    code = await generateHtmlFromInput({ input: input.value });
-  }
+  try {
+    if (code) {
+      code = await buildHtmlComponent({
+        snippet: code,
+        input: input.value,
+      });
+    } else {
+      code = await generateHtmlFromInput({ input: input.value });
+    }
 
-  if (code) {
-    snippet.value = sanitize(code);
-    history.value.push({ s: snippet.value, i: input.value });
-  }
+    if (code) {
+      snippet.value = sanitize(code);
+      history.value.push({ s: snippet.value, i: input.value });
+    }
 
-  input.value = "";
-  running.value = false;
+    input.value = "";
+  } finally {
+    running.value = false;
+  }
 }
 
 function sanitize(code) {
