@@ -4,6 +4,7 @@ import { request } from "node:https";
 const apiUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
 const apiModel = process.env.API_MODEL;
+const systemMessage = process.env.API_SYSTEM_MESSAGE;
 const completionOptions = {
   method: "POST",
   headers: {
@@ -12,10 +13,9 @@ const completionOptions = {
   },
 };
 
-
 createServer(async (req, res, next) => {
   if (!(req.method === "POST" && req.url === "/run")) {
-    next();
+    return next();
   }
 
   try {
@@ -23,7 +23,10 @@ createServer(async (req, res, next) => {
     const remote = request(apiUrl, completionOptions);
     const body = JSON.stringify({
       model: apiModel,
-      messages,
+      messages: [
+        systemMessage && { role: "system", message: systemMessage },
+        ...messages,
+      ].filter(Boolean),
     });
 
     remote.on("response", async (incoming) => {
