@@ -4,8 +4,8 @@
       <code v-if="snippet" class="builder__code">{{ snippet }}</code>
       <div v-if="snippet" class="builder__preview" v-html="snippet"></div>
       <div v-if="!snippet" class="builder__greeting">
-        <h1>Let's get started!</h1>
-        <p>
+        <h1 class="builder__greeting-title">Let's get started!</h1>
+        <p class="builder__greeting-text">
           Add instructions below to create or update the current markup.<br />Using
           Tailwind 2 for styles
         </p>
@@ -39,7 +39,7 @@ type HistoryEntry = {
 
 const input = ref("");
 const snippet = ref("");
-const history = ref<Array<{ h: HistoryEntry }>>([]);
+const history = ref<Array<HistoryEntry>>([]);
 const running = ref(false);
 const height = computed(() => input.value.split("\n").length + 1);
 
@@ -51,25 +51,27 @@ async function undo() {
   }
 
   const previous = list.pop()!;
-  snippet.value = previous.h.snippet;
-  input.value = previous.h.message;
+  snippet.value = previous.snippet;
+  input.value = previous.message;
   running.value = false;
 }
 
 async function apply() {
   running.value = true;
-  let code = snippet.value;
 
   try {
-    code = await chat.ask({
-      messages,
-      bot: 'default',
+    const body = JSON.stringify([
+      ...history.value.map((h) => ({ role: "user", message: h.message })),
+      { role: "assistant", message: snippet.value },
+      { role: "user", message: input.value },
+    ]);
 
-    })
+    const req = await fetch("/run", { method: "POST", body });
+    const code = await req.text();
 
     if (code) {
       snippet.value = sanitize(code);
-      history.value.push({ s: snippet.value, i: input.value });
+      history.value.push({ snippet: snippet.value, message: input.value });
     }
 
     input.value = "";
