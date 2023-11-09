@@ -29,8 +29,10 @@ export default async (req, res, next) => {
     });
 
     remote.on("response", async (incoming) => {
-      const body = JSON.parse(await readBody(incoming));
-      const answer = body.choices[0].message.content;
+      const body = await readBody(incoming);
+      console.log(body);
+
+      const answer = JSON.parse(body).choices[0]?.message.content ?? "";
       res.end(answer);
     });
 
