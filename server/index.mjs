@@ -1,4 +1,4 @@
-import { request } from "node:https";
+import { request as https } from "node:https";
 
 const apiUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
@@ -18,8 +18,8 @@ export default async (req, res, next) => {
   }
 
   try {
-    const messages = JSON.parse(await readBody(request));
-    const remote = request(apiUrl, completionOptions);
+    const messages = JSON.parse(await readBody(req));
+    const remote = https(apiUrl, completionOptions);
     const body = JSON.stringify({
       model: apiModel,
       messages: [
