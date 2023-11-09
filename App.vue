@@ -31,12 +31,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import buildHtmlComponent from "https://aifn.run/fn/fffeebb3-4605-4b91-ad56-7c25a2344b3c.js";
-import generateHtmlFromInput from "https://aifn.run/fn/08d5dd80-9dc2-4ca2-9354-b16433986b16.js";
+
+type HistoryEntry = {
+  message: string;
+  snippet: string;
+};
 
 const input = ref("");
 const snippet = ref("");
-const history = ref<Array<{ s: string; i: string }>>([]);
+const history = ref<Array<{ h: HistoryEntry }>>([]);
 const running = ref(false);
 const height = computed(() => input.value.split("\n").length + 1);
 
@@ -48,8 +51,8 @@ async function undo() {
   }
 
   const previous = list.pop()!;
-  snippet.value = previous.s;
-  input.value = previous.i;
+  snippet.value = previous.h.snippet;
+  input.value = previous.h.message;
   running.value = false;
 }
 
@@ -58,14 +61,11 @@ async function apply() {
   let code = snippet.value;
 
   try {
-    if (code) {
-      code = await buildHtmlComponent({
-        snippet: code,
-        input: input.value,
-      });
-    } else {
-      code = await generateHtmlFromInput({ input: input.value });
-    }
+    code = await chat.ask({
+      messages,
+      bot: 'default',
+
+    })
 
     if (code) {
       snippet.value = sanitize(code);
