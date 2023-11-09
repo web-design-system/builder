@@ -1,4 +1,3 @@
-import { createServer } from "node:http";
 import { request } from "node:https";
 
 const apiUrl = process.env.API_URL;
@@ -13,7 +12,7 @@ const completionOptions = {
   },
 };
 
-createServer(async (req, res, next) => {
+export default async (req, res, next) => {
   if (!(req.method === "POST" && req.url === "/run")) {
     return next();
   }
@@ -42,7 +41,7 @@ createServer(async (req, res, next) => {
     res.writeHead(500);
     res.end();
   }
-}).listen(Number(process.env.PORT));
+};
 
 function readBody(stream) {
   return new Promise((resolve) => {
