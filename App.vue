@@ -11,21 +11,29 @@
         </p>
       </div>
     </div>
-    <div class="builder__instruction">
+    <form class="builder__instruction" @submit.prevent="apply">
       <textarea
         :rows="height"
         class="builder__input"
         v-model="input"
         @keyup="onKeyUp"
       ></textarea>
-      <button class="builder__btn" @click="apply">
+      <button
+        class="builder__btn builder__btn-primary"
+        type="submit"
+        :disabled="!input"
+      >
         <span v-if="running" class="material-icons animate-spin">refresh</span>
         <span v-else class="material-icons">send</span>
       </button>
-      <button v-if="history.length" class="builder__btn" @click="undo">
+      <button
+        v-if="history.length"
+        class="builder__btn builder__btn-secondary"
+        @click="undo"
+      >
         <span class="material-icons">undo</span>
       </button>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -60,11 +68,11 @@ async function apply() {
   running.value = true;
 
   try {
-    const body = JSON.stringify([
-      ...history.value.map((h) => ({ role: "user", message: h.message })),
-      { role: "assistant", message: snippet.value },
-      { role: "user", message: input.value },
-    ]);
+    const body = JSON.stringify({
+      history: history.value.map((h) => h.message),
+      code: snippet.value,
+      instruction: input.value,
+    });
 
     const req = await fetch("/run", { method: "POST", body });
     const code = await req.text();

@@ -18,13 +18,15 @@ export default async (req, res, next) => {
   }
 
   try {
-    const messages = JSON.parse(await readBody(req));
+    const { history, code, instruction } = JSON.parse(await readBody(req));
     const remote = https(apiUrl, completionOptions);
     const body = JSON.stringify({
       model: apiModel,
       messages: [
-        systemMessage && { role: "system", message: systemMessage },
-        ...messages,
+        systemMessage && { role: "system", content: systemMessage },
+        ...history.map((m) => ({ role: "user", content: m })),
+        { role: "assistant", content: code },
+        { role: "user", content: instruction },
       ].filter(Boolean),
     });
 
