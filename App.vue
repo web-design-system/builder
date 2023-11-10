@@ -1,7 +1,7 @@
 <template>
   <div class="builder">
     <div class="builder__canvas">
-      <code v-if="snippet" class="builder__code">{{ snippet }}</code>
+      <textarea v-if="snippet" class="builder__code">{{ snippet }}</textarea>
       <div v-if="snippet" class="builder__preview" v-html="snippet"></div>
       <div v-if="!snippet" class="builder__greeting">
         <h1 class="builder__greeting-title">Let's get started!</h1>
