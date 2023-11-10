@@ -89,6 +89,13 @@ async function onLoad(_req, res, url) {
 
   const path = join(storagePath, fileId);
   await ensureFolder(dirname(path));
+
+  if (!existsSync(path)) {
+    res.writeHead(404);
+    res.end();
+    return;
+  }
+
   const body = await readFile(path, "utf-8");
   res.writeHead(200, { "content-length": body.length });
   res.end(body);
