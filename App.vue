@@ -33,12 +33,19 @@
       >
         <span class="material-icons">undo</span>
       </button>
+      <button
+        v-if="history.length"
+        class="builder__btn builder__btn-secondary"
+        @click="save"
+      >
+        <span class="material-icons">save</span>
+      </button>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 type HistoryEntry = {
   message: string;
@@ -50,6 +57,39 @@ const snippet = ref("");
 const history = ref<Array<HistoryEntry>>([]);
 const running = ref(false);
 const height = computed(() => input.value.split("\n").length + 1);
+const url = new URL(window.location.href);
+
+async function load() {
+  const id = url.searchParams.get("id");
+
+  if (!id) {
+    return;
+  }
+
+  const f = await fetch("/components?id" + id);
+  const { history, snippet, input } = await f.json();
+
+  history.value = history;
+  snippet.value = snippet;
+  input.value = input;
+}
+
+async function save() {
+  const id = url.searchParams.get("id");
+
+  if (!id) {
+    return;
+  }
+
+  await fetch("/components?id" + id, {
+    method: "POST",
+    body: JSON.stringify({
+      history: history.value,
+      snippet: snippet.value,
+      input: input.value,
+    }),
+  });
+}
 
 async function undo() {
   const list = history.value;
@@ -101,4 +141,6 @@ function onKeyUp(event: KeyboardEvent) {
     apply();
   }
 }
+
+onMounted(load);
 </script>

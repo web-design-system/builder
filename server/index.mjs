@@ -1,5 +1,8 @@
 import { request as https } from "node:https";
+import { writeFile, readFile } from "node:fs/promises";
+import { join, resolve } from 'node:path';
 
+const storagePath = resolve(process.env.STORAGE_PATH);
 const apiUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
 const apiModel = process.env.API_MODEL;
@@ -13,12 +16,26 @@ const completionOptions = {
 };
 
 export default async (req, res, next) => {
-  if (!(req.method === "POST" && req.url === "/run")) {
-    return next();
+  const url = new URL(req.url, 'http://localhost');
+
+  if (req.method === "POST" && url.pathname === "/run") {
+    return onRun(req, res);
   }
 
+  if (req.method === "POST" && url.pathname === "/components") {
+    return onSave(req, res, url);
+  }
+
+  if (req.method === "GET" && url.pathname === "/components") {
+    return onLoad(req, res, url);
+  }
+
+  next();
+};
+
+async function onRun(req, res) {
   try {
-    const { history, code, instruction } = JSON.parse(await readBody(req));
+    const { history, code, instruction } = JSON.parse(await readStream(req));
     const remote = https(apiUrl, completionOptions);
     const body = JSON.stringify({
       model: apiModel,
@@ -31,9 +48,7 @@ export default async (req, res, next) => {
     });
 
     remote.on("response", async (incoming) => {
-      const body = await readBody(incoming);
-      console.log(body);
-
+      const body = await readStream(incoming);
       const answer = JSON.parse(body).choices[0]?.message.content ?? "";
       res.end(answer);
     });
@@ -45,9 +60,36 @@ export default async (req, res, next) => {
     res.writeHead(500);
     res.end();
   }
-};
+}
 
-function readBody(stream) {
+async function onSave(req, res, url) {
+  const body = await readStream(req);
+  const fileId = url.searchParams.get('id');
+
+  if (!fileId) {
+    res.writeHead(400);
+    res.end('Missing parameter: /component?id=?');
+    return;
+  }
+
+  writeFile(join(storagePath, fileId), body);
+}
+
+async function onLoad(_req, res, url) {
+  const fileId = url.searchParams.get('id');
+
+  if (!fileId) {
+    res.writeHead(400);
+    res.end('Missing parameter: /component?id=?');
+    return;
+  }
+
+  const body = await readFile(join(storagePath, fileId), 'utf-8');
+  res.writeHead(200, { 'content-length': body.length })
+  res.end(body);
+}
+
+function readStream(stream) {
   return new Promise((resolve) => {
     const a = [];
     stream.on("data", (c) => a.push(c));
