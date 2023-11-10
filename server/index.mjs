@@ -75,7 +75,9 @@ async function onSave(req, res, url) {
 
   const path = join(storagePath, fileId);
   await ensureFolder(dirname(path));
-  writeFile(path, body);
+  await writeFile(path, body);
+  res.writeHead(202);
+  res.end();
 }
 
 async function onLoad(_req, res, url) {
