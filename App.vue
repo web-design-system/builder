@@ -71,7 +71,7 @@ async function load() {
   const state = await fetch("/components?id=" + id);
   const json = await state.json();
 
-  history.value = json.history || '';
+  history.value = json.history || [];
   snippet.value = json.snippet || '';
   input.value = json.input || '';
 }
