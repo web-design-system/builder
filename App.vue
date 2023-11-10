@@ -1,13 +1,13 @@
 <template>
   <div class="builder">
     <div class="builder__canvas">
-      <textarea v-if="snippet" class="builder__code">{{ snippet }}</textarea>
+      <textarea class="builder__code">{{ snippet }}</textarea>
       <div v-if="snippet" class="builder__preview" v-html="snippet"></div>
-      <div v-if="!snippet" class="builder__greeting">
+      <div v-else class="builder__preview">
         <h1 class="builder__greeting-title">Let's get started!</h1>
         <p class="builder__greeting-text">
-          Add instructions below to create or update the current markup.<br />Using
-          Tailwind 2 for styles
+          Add instructions below to create or update the current markup.<br />
+          Use Tailwind 2.x for styling.
         </p>
       </div>
     </div>
