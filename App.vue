@@ -30,12 +30,14 @@
         v-if="history.length"
         class="builder__btn builder__btn-secondary"
         @click="undo"
-      >
+        type="button"
+        >
         <span class="material-icons">undo</span>
       </button>
       <button
         v-if="history.length"
         class="builder__btn builder__btn-secondary"
+        type="button"
         @click="save"
       >
         <span class="material-icons">save</span>
