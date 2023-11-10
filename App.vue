@@ -1,9 +1,9 @@
 <template>
   <div class="builder">
     <div class="builder__canvas">
-      <textarea class="builder__code" v-model="snippet"></textarea>
       <div v-if="snippet" class="builder__preview" v-html="snippet"></div>
-      <div v-else class="builder__preview">
+      <textarea class="builder__code" v-model="snippet"></textarea>
+      <div v-if="!snippet" class="builder__preview">
         <h1 class="builder__greeting-title">Let's get started!</h1>
         <p class="builder__greeting-text">
           Add instructions below to create or update the current markup.<br />
@@ -69,11 +69,11 @@ async function load() {
   }
 
   const f = await fetch("/components?id=" + id);
-  const { history, snippet, input } = await f.json();
+  const { _history, _snippet, _input } = await f.json();
 
-  history.value = history;
-  snippet.value = snippet;
-  input.value = input;
+  history.value = _history;
+  snippet.value = _snippet;
+  input.value = _input;
 }
 
 async function save() {
