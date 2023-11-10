@@ -1,6 +1,7 @@
 import { request as https } from "node:https";
 import { writeFile, readFile } from "node:fs/promises";
-import { join, resolve } from 'node:path';
+import { existsSync } from "node:fs";
+import { join, resolve, dirname } from "node:path";
 
 const storagePath = resolve(process.env.STORAGE_PATH);
 const apiUrl = process.env.API_URL;
@@ -16,7 +17,7 @@ const completionOptions = {
 };
 
 export default async (req, res, next) => {
-  const url = new URL(req.url, 'http://localhost');
+  const url = new URL(req.url, "http://localhost");
 
   if (req.method === "POST" && url.pathname === "/run") {
     return onRun(req, res);
@@ -64,28 +65,32 @@ async function onRun(req, res) {
 
 async function onSave(req, res, url) {
   const body = await readStream(req);
-  const fileId = url.searchParams.get('id');
+  const fileId = url.searchParams.get("id");
 
   if (!fileId) {
     res.writeHead(400);
-    res.end('Missing parameter: /component?id=?');
+    res.end("Missing parameter: /component?id=?");
     return;
   }
 
-  writeFile(join(storagePath, fileId), body);
+  const path = join(storagePath, fileId);
+  await ensureFolder(dirname(path));
+  writeFile(path, body);
 }
 
 async function onLoad(_req, res, url) {
-  const fileId = url.searchParams.get('id');
+  const fileId = url.searchParams.get("id");
 
   if (!fileId) {
     res.writeHead(400);
-    res.end('Missing parameter: /component?id=?');
+    res.end("Missing parameter: /component?id=?");
     return;
   }
 
-  const body = await readFile(join(storagePath, fileId), 'utf-8');
-  res.writeHead(200, { 'content-length': body.length })
+  const path = join(storagePath, fileId);
+  await ensureFolder(dirname(path));
+  const body = await readFile(path, "utf-8");
+  res.writeHead(200, { "content-length": body.length });
   res.end(body);
 }
 
@@ -98,4 +103,8 @@ function readStream(stream) {
       resolve(buffer);
     });
   });
+}
+
+async function ensureFolder(folder) {
+  return existsSync(folder) || (await mkdir(folder, { recursive: true }));
 }

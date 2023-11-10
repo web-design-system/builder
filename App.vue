@@ -66,7 +66,7 @@ async function load() {
     return;
   }
 
-  const f = await fetch("/components?id" + id);
+  const f = await fetch("/components?id=" + id);
   const { history, snippet, input } = await f.json();
 
   history.value = history;
@@ -81,7 +81,7 @@ async function save() {
     return;
   }
 
-  await fetch("/components?id" + id, {
+  await fetch("/components?id=" + id, {
     method: "POST",
     body: JSON.stringify({
       history: history.value,
