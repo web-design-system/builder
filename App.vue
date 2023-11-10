@@ -70,11 +70,10 @@ async function load() {
 
   const state = await fetch("/components?id=" + id);
   const json = await state.json();
-  const { _history = "", _snippet = "", _input = "" } = json;
 
-  history.value = _history;
-  snippet.value = _snippet;
-  input.value = _input;
+  history.value = json.history || '';
+  snippet.value = json.snippet || '';
+  input.value = json.input || '';
 }
 
 async function save() {
