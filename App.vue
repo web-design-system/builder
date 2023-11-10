@@ -31,7 +31,7 @@
         class="builder__btn builder__btn-secondary"
         @click="undo"
         type="button"
-        >
+      >
         <span class="material-icons">undo</span>
       </button>
       <button
@@ -68,8 +68,9 @@ async function load() {
     return;
   }
 
-  const f = await fetch("/components?id=" + id);
-  const { _history = '', _snippet = '', _input = '' } = await f.json();
+  const state = await fetch("/components?id=" + id);
+  const json = await state.json();
+  const { _history = "", _snippet = "", _input = "" } = json;
 
   history.value = _history;
   snippet.value = _snippet;

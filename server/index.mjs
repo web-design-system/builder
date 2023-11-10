@@ -97,7 +97,10 @@ async function onLoad(_req, res, url) {
   }
 
   const body = await readFile(path, "utf-8");
-  res.writeHead(200, { "content-length": body.length });
+  res.writeHead(200, {
+    "content-type": 'application/json',
+    "content-length": body.length,
+  });
   res.end(body);
 }
 
