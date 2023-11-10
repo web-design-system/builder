@@ -35,7 +35,7 @@
         <span class="material-icons">undo</span>
       </button>
       <button
-        :disabled="!!(snippet.length || history.length)"
+        :disabled="!(snippet.length || history.length)"
         class="builder__btn builder__btn-secondary"
         type="button"
         @click="save"
@@ -69,7 +69,7 @@ async function load() {
   }
 
   const f = await fetch("/components?id=" + id);
-  const { _history, _snippet, _input } = await f.json();
+  const { _history = '', _snippet = '', _input = '' } = await f.json();
 
   history.value = _history;
   snippet.value = _snippet;
