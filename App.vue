@@ -35,7 +35,7 @@
         <span class="material-icons">undo</span>
       </button>
       <button
-        v-if="history.length"
+        :disabled="!!(snippet.length || history.length)"
         class="builder__btn builder__btn-secondary"
         type="button"
         @click="save"
