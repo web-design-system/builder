@@ -1,7 +1,7 @@
 <template>
   <div class="builder">
     <div class="builder__canvas">
-      <textarea class="builder__code">{{ snippet }}</textarea>
+      <textarea class="builder__code" v-model="snippet"></textarea>
       <div v-if="snippet" class="builder__preview" v-html="snippet"></div>
       <div v-else class="builder__preview">
         <h1 class="builder__greeting-title">Let's get started!</h1>
