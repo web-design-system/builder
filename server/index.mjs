@@ -18,23 +18,25 @@ const completionOptions = {
 
 export default async (req, res, next) => {
   const url = new URL(req.url, "http://localhost");
+  const [action, ...args] = url.pathname.slice(1).split("/");
+  const route = `${req.method} ${action}`;
+  const event = { req, res, url, args };
 
-  if (req.method === "POST" && url.pathname === "/run") {
-    return onRun(req, res);
+  switch (route) {
+    case "POST run":
+      return onRun(event);
+    case "POST publish":
+      return onPublish(event);
+    case "POST components":
+      return onSave(event);
+    case "GET components":
+      return onLoad(event);
+    default:
+      next();
   }
-
-  if (req.method === "POST" && url.pathname === "/components") {
-    return onSave(req, res, url);
-  }
-
-  if (req.method === "GET" && url.pathname === "/components") {
-    return onLoad(req, res, url);
-  }
-
-  next();
 };
 
-async function onRun(req, res) {
+async function onRun({ req, res }) {
   try {
     const { history, code, instruction } = JSON.parse(await readStream(req));
     const remote = https(apiUrl, completionOptions);
@@ -63,13 +65,33 @@ async function onRun(req, res) {
   }
 }
 
-async function onSave(req, res, url) {
+async function onPublish({ args, res }) {
+  const id = args[0];
+
+  if (!id) {
+    badRequest('/publish/:id');
+    return;
+  }
+
+  const sourcePath = join(storagePath, id);
+  if (!existsSync(sourcePath)) {
+    notFound(res);
+    return;
+  }
+
+  const json = JSON.parse(await readFile(path, "utf-8"));
+  const targetPath = join(storagePath, id + '.html');
+
+  await writeFile(targetPath, json.snippet);
+  res.end('OK');
+}
+
+async function onSave({ req, res, args }) {
   const body = await readStream(req);
-  const fileId = url.searchParams.get("id");
+  const fileId = args[0];
 
   if (!fileId) {
-    res.writeHead(400);
-    res.end("Missing parameter: /component?id=?");
+    badRequest('/component/:id');
     return;
   }
 
@@ -80,12 +102,11 @@ async function onSave(req, res, url) {
   res.end();
 }
 
-async function onLoad(_req, res, url) {
-  const fileId = url.searchParams.get("id");
+async function onLoad({ res, args }) {
+  const fileId = args[0];
 
   if (!fileId) {
-    res.writeHead(400);
-    res.end("Missing parameter: /component?id=?");
+    badRequest('/component/:id');
     return;
   }
 
@@ -93,14 +114,13 @@ async function onLoad(_req, res, url) {
   await ensureFolder(dirname(path));
 
   if (!existsSync(path)) {
-    res.writeHead(404);
-    res.end();
+    notFound(res);
     return;
   }
 
   const body = await readFile(path, "utf-8");
   res.writeHead(200, {
-    "content-type": 'application/json',
+    "content-type": "application/json",
     "content-length": body.length,
   });
   res.end(body);
@@ -119,4 +139,14 @@ function readStream(stream) {
 
 async function ensureFolder(folder) {
   return existsSync(folder) || (await mkdir(folder, { recursive: true }));
+}
+
+function notFound(res) {
+  res.writeHead(404);
+  res.end('Not found');
+}
+
+function badRequest(path) {
+  res.writeHead(400);
+  res.end(`Missing parameter: ${path}`);
 }

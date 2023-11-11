@@ -70,12 +70,12 @@ async function load() {
     return;
   }
 
-  const state = await fetch("/components?id=" + id);
+  const state = await fetch("/components/" + id);
   const json = await state.json();
 
   history.value = json.history || [];
-  snippet.value = json.snippet || '';
-  input.value = json.input || '';
+  snippet.value = json.snippet || "";
+  input.value = json.input || "";
 }
 
 async function save() {
@@ -85,7 +85,7 @@ async function save() {
     return;
   }
 
-  await fetch("/components?id=" + id, {
+  await fetch("/components/" + id, {
     method: "POST",
     body: JSON.stringify({
       history: history.value,
