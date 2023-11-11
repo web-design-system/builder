@@ -44,6 +44,14 @@
       >
         <span class="material-icons">save</span>
       </button>
+      <button
+        :disabled="!(snippet.length || history.length)"
+        class="builder__btn builder__btn-secondary"
+        type="button"
+        @click="publish"
+      >
+        <span class="material-icons">publish</span>
+      </button>
     </form>
   </div>
 </template>
@@ -93,6 +101,20 @@ async function save() {
       input: input.value,
     }),
   });
+}
+
+async function publish() {
+  const id = url.searchParams.get("id");
+
+  if (!id) {
+    return;
+  }
+
+  if (!confirm("Sure?")) {
+    return;
+  }
+
+  await fetch("/publish/" + id, { method: "POST" });
 }
 
 async function undo() {
