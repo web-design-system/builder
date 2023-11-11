@@ -1,7 +1,9 @@
 <template>
   <div class="builder">
     <div class="builder__canvas">
-      <div v-if="snippet" class="builder__preview" v-html="snippet"></div>
+      <div v-if="snippet" class="builder__preview">
+        <div v-html="snippet"></div>
+      </div>
       <textarea class="builder__code" v-model="snippet"></textarea>
       <div v-if="!snippet" class="builder__preview">
         <h1 class="builder__greeting-title">Let's get started!</h1>
@@ -58,7 +60,7 @@ const input = ref("");
 const snippet = ref("");
 const history = ref<Array<HistoryEntry>>([]);
 const running = ref(false);
-const height = computed(() => input.value.split("\n").length + 1);
+const height = computed(() => input.value.split("\n").length);
 const url = new URL(window.location.href);
 
 async function load() {
