@@ -47,6 +47,7 @@
       <button
         :disabled="!(snippet.length || history.length)"
         class="builder__btn builder__btn-secondary"
+        :class="[publishing && 'animate-pulse' || '']"
         type="button"
         @click="publish"
       >
@@ -68,6 +69,7 @@ const input = ref("");
 const snippet = ref("");
 const history = ref<Array<HistoryEntry>>([]);
 const running = ref(false);
+const publishing = ref(false);
 const height = computed(() => input.value.split("\n").length);
 const url = new URL(window.location.href);
 
@@ -114,7 +116,12 @@ async function publish() {
     return;
   }
 
-  await fetch("/publish/" + id, { method: "POST" });
+  try {
+    publishing.value = true;
+    await fetch("/publish/" + id, { method: "POST" });
+  } finally {
+    publishing.false = true;
+  }
 }
 
 async function undo() {

@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 
 const storagePath = resolve(process.env.STORAGE_PATH);
+const publishPath = resolve(process.env.PUBLISH_PATH);
 const apiUrl = process.env.API_URL;
 const apiKey = process.env.API_KEY;
 const apiModel = process.env.API_MODEL;
@@ -80,7 +81,7 @@ async function onPublish({ args, res }) {
   }
 
   const json = JSON.parse(await readFile(sourcePath, "utf-8"));
-  const targetPath = join(storagePath, id + '.html');
+  const targetPath = join(publishPath, id + '.html');
 
   await writeFile(targetPath, json.snippet);
   res.end('OK');
