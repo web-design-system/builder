@@ -79,7 +79,7 @@ async function onPublish({ args, res }) {
     return;
   }
 
-  const json = JSON.parse(await readFile(path, "utf-8"));
+  const json = JSON.parse(await readFile(sourcePath, "utf-8"));
   const targetPath = join(storagePath, id + '.html');
 
   await writeFile(targetPath, json.snippet);
