@@ -70,7 +70,7 @@ async function onPublish({ args, res }) {
   const id = args[0];
 
   if (!id) {
-    badRequest('/publish/:id');
+    badRequest("/publish/:id");
     return;
   }
 
@@ -81,10 +81,10 @@ async function onPublish({ args, res }) {
   }
 
   const json = JSON.parse(await readFile(sourcePath, "utf-8"));
-  const targetPath = join(publishPath, id + '.html');
+  const targetPath = join(publishPath, id + ".html");
 
   await writeFile(targetPath, json.snippet);
-  res.end('OK');
+  res.end("OK");
 }
 
 async function onSave({ req, res, args }) {
@@ -92,7 +92,7 @@ async function onSave({ req, res, args }) {
   const fileId = args[0];
 
   if (!fileId) {
-    badRequest('/component/:id');
+    badRequest("/component/:id");
     return;
   }
 
@@ -107,7 +107,7 @@ async function onLoad({ res, args }) {
   const fileId = args[0];
 
   if (!fileId) {
-    badRequest('/component/:id');
+    badRequest("/component/:id");
     return;
   }
 
@@ -122,7 +122,6 @@ async function onLoad({ res, args }) {
   const body = await readFile(path, "utf-8");
   res.writeHead(200, {
     "content-type": "application/json",
-    "content-length": body.length,
   });
   res.end(body);
 }
@@ -144,7 +143,7 @@ async function ensureFolder(folder) {
 
 function notFound(res) {
   res.writeHead(404);
-  res.end('Not found');
+  res.end("Not found");
 }
 
 function badRequest(path) {

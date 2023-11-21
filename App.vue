@@ -23,7 +23,7 @@
       <button
         class="builder__btn builder__btn-primary"
         type="submit"
-        :disabled="!input"
+        :disabled="!input || running"
       >
         <span v-if="running" class="material-icons animate-spin">refresh</span>
         <span v-else class="material-icons">send</span>
@@ -39,6 +39,7 @@
       <button
         :disabled="!(snippet.length || history.length)"
         class="builder__btn builder__btn-secondary"
+        :class="[(saving && 'animate-pulse') || '']"
         type="button"
         @click="save"
       >
@@ -47,7 +48,7 @@
       <button
         :disabled="!(snippet.length || history.length)"
         class="builder__btn builder__btn-secondary"
-        :class="[publishing && 'animate-pulse' || '']"
+        :class="[(publishing && 'animate-pulse') || '']"
         type="button"
         @click="publish"
       >
@@ -70,6 +71,7 @@ const snippet = ref("");
 const history = ref<Array<HistoryEntry>>([]);
 const running = ref(false);
 const publishing = ref(false);
+const saving = ref(false);
 const height = computed(() => input.value.split("\n").length);
 const url = new URL(window.location.href);
 
@@ -95,14 +97,19 @@ async function save() {
     return;
   }
 
-  await fetch("/components/" + id, {
-    method: "POST",
-    body: JSON.stringify({
-      history: history.value,
-      snippet: snippet.value,
-      input: input.value,
-    }),
-  });
+  try {
+    saving.value = true;
+    await fetch("/components/" + id, {
+      method: "POST",
+      body: JSON.stringify({
+        history: history.value,
+        snippet: snippet.value,
+        input: input.value,
+      }),
+    });
+  } finally {
+    saving.value = false;
+  }
 }
 
 async function publish() {
@@ -120,7 +127,7 @@ async function publish() {
     publishing.value = true;
     await fetch("/publish/" + id, { method: "POST" });
   } finally {
-    publishing.false = true;
+    publishing.value = true;
   }
 }
 
