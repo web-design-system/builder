@@ -2,6 +2,7 @@ import { request as https } from "node:https";
 import { writeFile, readFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
+import { randomUUID } from "node:crypto";
 
 const storagePath = resolve(process.env.STORAGE_PATH);
 const publishPath = resolve(process.env.PUBLISH_PATH);
@@ -20,10 +21,13 @@ const completionOptions = {
 export default async (req, res, next) => {
   const url = new URL(req.url, "http://localhost");
   const [action, ...args] = url.pathname.slice(1).split("/");
-  const route = `${req.method} ${action}`;
+  const route = `${req.method} ${action}`.trim();
   const event = { req, res, url, args };
 
   switch (route) {
+    case "GET":
+    case "GET edit":
+      return onServeEditor(event);
     case "POST run":
       return onRun(event);
     case "POST publish":
@@ -36,6 +40,14 @@ export default async (req, res, next) => {
       next();
   }
 };
+
+async function onServeEditor({ args, res }) {
+  const id = args[0] || randomUUID();
+  res.writeHead(302, {
+    location: "/?id=" + id,
+  });
+  res.end();
+}
 
 async function onRun({ req, res }) {
   try {
