@@ -41,8 +41,11 @@ export default async (req, res, next) => {
   }
 };
 
-async function onServeEditor({ args, res, url, next }) {
-  if (url.searchParams.has("id") || args[0]) {
+async function onServeEditor({ args, req, res, next }) {
+  console.log("Editing " + args[0]);
+
+  if (args[0]) {
+    req.url = '/';
     next();
     return;
   }
