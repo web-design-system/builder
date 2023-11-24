@@ -1,8 +1,11 @@
 <template>
   <div class="builder">
+    <div class="builder__toolbar">
+      <Preview @resize="setWidth($event)"></Preview>
+    </div>
     <div class="builder__canvas">
       <div v-if="snippet" class="builder__preview">
-        <div v-html="snippet"></div>
+        <div v-html="snippet" v-bind:style="{ maxWidth: previewWidth }"></div>
       </div>
       <div v-if="!snippet" class="builder__greeting">
         <h1 class="builder__greeting-title">Let's get started!</h1>
@@ -60,6 +63,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import Preview from './Preview.vue';
 
 type HistoryEntry = {
   message: string;
@@ -75,6 +79,11 @@ const saving = ref(false);
 const height = computed(() => input.value.split("\n").length);
 const url = new URL(window.location.href);
 const componentId = url.searchParams.get("id") || url.pathname.replace('/edit/', '');
+const previewWidth = ref("100%");
+
+function setWidth(value) {
+  previewWidth.value = value;
+}
 
 async function load() {
   if (!componentId) {
