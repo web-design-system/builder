@@ -22,7 +22,7 @@ export default async (req, res, next) => {
   const url = new URL(req.url, "http://localhost");
   const [action, ...args] = url.pathname.slice(1).split("/");
   const route = `${req.method} ${action}`.trim();
-  const event = { req, res, url, args };
+  const event = { req, res, url, args, next };
 
   switch (route) {
     case "GET":
@@ -41,10 +41,14 @@ export default async (req, res, next) => {
   }
 };
 
-async function onServeEditor({ args, res }) {
-  const id = args[0] || randomUUID();
+async function onServeEditor({ args, res, url, next }) {
+  if (url.searchParams.has("id") || args[0]) {
+    next();
+    return;
+  }
+
   res.writeHead(302, {
-    location: "/?id=" + id,
+    location: "/edit/" + randomUUID(),
   });
   res.end();
 }

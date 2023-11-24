@@ -74,15 +74,14 @@ const publishing = ref(false);
 const saving = ref(false);
 const height = computed(() => input.value.split("\n").length);
 const url = new URL(window.location.href);
+const componentId = url.searchParams.get("id") || url.pathname.replace('/edit/', '');
 
 async function load() {
-  const id = url.searchParams.get("id");
-
-  if (!id) {
+  if (!componentId) {
     return;
   }
 
-  const state = await fetch("/components/" + id);
+  const state = await fetch("/components/" + componentId);
   const json = await state.json();
 
   history.value = json.history || [];
@@ -91,15 +90,13 @@ async function load() {
 }
 
 async function save() {
-  const id = url.searchParams.get("id");
-
-  if (!id) {
+  if (!componentId) {
     return;
   }
 
   try {
     saving.value = true;
-    await fetch("/components/" + id, {
+    await fetch("/components/" + componentId, {
       method: "POST",
       body: JSON.stringify({
         history: history.value,
@@ -113,9 +110,7 @@ async function save() {
 }
 
 async function publish() {
-  const id = url.searchParams.get("id");
-
-  if (!id) {
+  if (!componentId) {
     return;
   }
 
@@ -125,7 +120,7 @@ async function publish() {
 
   try {
     publishing.value = true;
-    await fetch("/publish/" + id, { method: "POST" });
+    await fetch("/publish/" + componentId, { method: "POST" });
   } finally {
     publishing.value = true;
   }
