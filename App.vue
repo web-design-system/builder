@@ -4,14 +4,14 @@
       <div v-if="snippet" class="builder__preview">
         <div v-html="snippet"></div>
       </div>
-      <textarea class="builder__code" v-model="snippet"></textarea>
-      <div v-if="!snippet" class="builder__preview">
+      <div v-if="!snippet" class="builder__greeting">
         <h1 class="builder__greeting-title">Let's get started!</h1>
         <p class="builder__greeting-text">
           Add instructions below to create or update the current markup.<br />
           Use Tailwind 2.x for styling.
         </p>
       </div>
+      <textarea class="builder__code" v-model="snippet"></textarea>
     </div>
     <form class="builder__instruction" @submit.prevent="apply">
       <textarea
