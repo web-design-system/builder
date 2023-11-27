@@ -6,15 +6,15 @@ export type HistoryEntry = {
 };
 
 export class UndoAction extends Action {
-  readonly type = "code:undo";
+  static readonly type = "code:undo";
 }
 
 export class ApplyUpdateAction extends Action<string> {
-  readonly type = "code:update";
+  static readonly type = "code:update";
 }
 
 export class ViewportSizeAction extends Action<string> {
-  readonly type = "viewport:size";
+  static readonly type = "viewport:size";
   static readonly sizes = {
     sm: "640px",
     md: "768px",
@@ -26,7 +26,7 @@ export class ViewportSizeAction extends Action<string> {
 }
 
 export class SetLayoutAction extends Action<string> {
-  readonly type = "layout";
+  static readonly type = "layout";
   static readonly layouts = {
     preview: "preview",
     code: "code",
@@ -35,11 +35,11 @@ export class SetLayoutAction extends Action<string> {
 }
 
 export class HistoryLoadAction extends Action<null> {
-  readonly type = "history:load";
+  static readonly type = "history:load";
 }
 
 export class HistoryLoadedAction extends Action {
-  readonly type = "history:loaded";
+  static readonly type = "history:loaded";
   readonly payload: {
     history: HistoryEntry[];
     input: string;
@@ -48,21 +48,21 @@ export class HistoryLoadedAction extends Action {
 }
 
 export class PublishAction extends Action {
-  readonly type = "publish";
+  static readonly type = "publish";
 }
 
 export class HistorySaveAction extends Action {
-  readonly type = "history:save";
+  static readonly type = "history:save";
 }
 
 export class HistorySavedAction extends Action {
-  readonly type = "history:saved";
+  static readonly type = "history:saved";
 }
 
 export class UpdateAction extends Action {
-  readonly type = "code:update";
+  static readonly type = "code:update";
 }
 
 export class UpdateCompletedAction extends Action {
-  readonly type = "code:updated";
+  static readonly type = "code:updated";
 }

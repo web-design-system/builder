@@ -4,7 +4,7 @@ const changeEvent = "C";
 
 export type State = any;
 export class Action<T extends any = any> {
-  readonly type: string;
+  static readonly type: string;
   constructor(public readonly payload: T) {}
 }
 
@@ -16,7 +16,7 @@ export type Reducer<S extends State, A extends Action> = (
 export type Selector<T extends State, U extends any> = (state: T) => U;
 
 class SetterAction<S extends State = any> extends Action {
-  readonly type = ":set:";
+  static readonly type = ":set:";
   readonly payload: { key: keyof S; value: S[keyof S] };
 
   constructor(key: keyof S, value: S[keyof S]) {
@@ -53,11 +53,11 @@ export function useState<StateType extends State>(initial: StateType) {
     A extends typeof Action<any>,
     R extends Reducer<StateType, InstanceType<A>>
   >(action: A, reducer: R) {
-    reducers.push({ type: action.prototype.type, R: reducer });
+    reducers.push({ type: action.type, R: reducer });
   }
 
   async function dispatch<A extends Action>(action: A) {
-    const { type } = action;
+    const type: string = Object.getPrototypeOf(action).constructor.type;
 
     for (const reducer of reducers) {
       if (reducer.type === type) {
