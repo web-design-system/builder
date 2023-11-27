@@ -9,6 +9,7 @@ import {
   UpdateAction,
   UpdateCompletedAction,
   PublishAction,
+SetLayoutAction,
 } from "./actions";
 
 import { reduce, dispatch, set } from "./state";
@@ -26,6 +27,7 @@ reduce(HistorySaveAction, async (state) => {
   }
 });
 
+reduce(SetLayoutAction, (_, action) => set("layout", action.payload));
 reduce(HistorySaveAction, () => set("saving", true));
 reduce(HistorySavedAction, () => set("saving", false));
 reduce(HistoryLoadedAction, (state, action) => {

@@ -113,8 +113,6 @@ const viewportSize = select((s) => s.viewportSize);
 const viewportSizes = select((s) => s.viewportSizes);
 const layoutOptions = select((s) => s.layoutOptions);
 const layout = select((s) => s.layout);
-const showCode = select((s) => s.showCode);
-const showConsole = select((s) => s.showConsole);
 const history = select((s) => s.history);
 const input = select((s) => s.input);
 const snippet = select((s) => s.snippet);
