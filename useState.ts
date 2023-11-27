@@ -5,7 +5,12 @@ const changeEvent = "C";
 export type State = any;
 export class Action<T extends any = any> {
   static readonly type: string;
-  constructor(public readonly payload: T) {}
+  readonly payload: T;
+  constructor(payload?: T) {
+    if (payload !== undefined) {
+      this.payload = payload;
+    }
+  }
 }
 
 export type Reducer<S extends State, A extends Action> = (
@@ -15,13 +20,14 @@ export type Reducer<S extends State, A extends Action> = (
 
 export type Selector<T extends State, U extends any> = (state: T) => U;
 
-class SetterAction<S extends State = any> extends Action {
+class SetterAction<S extends State = any> extends Action<{
+  key: keyof S;
+  value: S[keyof S];
+}> {
   static readonly type = ":set:";
-  readonly payload: { key: keyof S; value: S[keyof S] };
 
   constructor(key: keyof S, value: S[keyof S]) {
-    super(null);
-    this.payload = { key, value };
+    super({ key, value });
   }
 }
 
@@ -61,7 +67,7 @@ export function useState<StateType extends State>(initial: StateType) {
 
     for (const reducer of reducers) {
       if (reducer.type === type) {
-        state = await reducer.R(state, action) || state;
+        state = (await reducer.R(state, action)) || state;
       }
     }
 

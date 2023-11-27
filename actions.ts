@@ -38,13 +38,14 @@ export class HistoryLoadAction extends Action<null> {
   static readonly type = "history:load";
 }
 
-export class HistoryLoadedAction extends Action {
+type History = {
+  history: HistoryEntry[];
+  input: string;
+  snippet: string;
+};
+
+export class HistoryLoadedAction extends Action<History> {
   static readonly type = "history:loaded";
-  readonly payload: {
-    history: HistoryEntry[];
-    input: string;
-    snippet: string;
-  };
 }
 
 export class PublishAction extends Action {
