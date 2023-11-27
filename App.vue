@@ -38,7 +38,14 @@
       />
     </div>
     <div class="builder__canvas">
-      <div v-if="snippet" class="builder__preview">
+      <div
+        class="builder__preview"
+        v-if="
+          snippet &&
+          (layout === SetLayoutAction.layouts.both ||
+            layout === SetLayoutAction.layouts.preview)
+        "
+      >
         <div
           class="builder__preview-frame"
           v-html="snippet"
@@ -55,14 +62,13 @@
       <textarea
         class="builder__code"
         v-model="snippet"
-        v-if="showCode"
+        v-if="
+          layout === SetLayoutAction.layouts.both ||
+          layout === SetLayoutAction.layouts.code
+        "
       ></textarea>
     </div>
-    <form
-      class="builder__instruction"
-      @submit.prevent="onApply"
-      v-if="showConsole"
-    >
+    <form class="builder__instruction" @submit.prevent="onApply">
       <textarea
         :rows="height"
         class="builder__input"
@@ -101,6 +107,7 @@ import {
   UpdateAction,
   ViewportSizeAction,
 } from "./actions";
+import "./effects.js";
 
 const viewportSize = select((s) => s.viewportSize);
 const viewportSizes = select((s) => s.viewportSizes);
