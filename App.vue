@@ -1,11 +1,49 @@
 <template>
   <div class="builder">
     <div class="builder__toolbar">
-      <Preview @resize="setWidth($event)"></Preview>
+      <span class="btn-group">
+        <button
+          class="btn-icon"
+          title="Save"
+          :disabled="!(snippet.length || history.length)"
+          :class="[(saving && 'animate-pulse') || '']"
+          type="button"
+          @click="save"
+        >
+          <span class="material-icons">save</span>
+        </button>
+
+        <button
+          class="btn-icon"
+          title="Publish"
+          :disabled="!(snippet.length || history.length)"
+          :class="[(publishing && 'animate-pulse') || '']"
+          type="button"
+          @click="onPublish"
+        >
+          <span class="material-icons">publish</span>
+        </button>
+      </span>
+
+      <Selector
+        @select="setWidth($event)"
+        :options="viewportSizes"
+        :value="viewportSize"
+      />
+
+      <Selector
+        @select="setLayout($event)"
+        :options="layoutOptions"
+        :value="layout"
+      />
     </div>
     <div class="builder__canvas">
       <div v-if="snippet" class="builder__preview">
-        <div v-html="snippet" v-bind:style="{ maxWidth: previewWidth }"></div>
+        <div
+          class="builder__preview-frame"
+          v-html="snippet"
+          v-bind:style="{ maxWidth: viewportSize }"
+        ></div>
       </div>
       <div v-if="!snippet" class="builder__greeting">
         <h1 class="builder__greeting-title">Let's get started!</h1>
@@ -14,9 +52,17 @@
           Use Tailwind 2.x for styling.
         </p>
       </div>
-      <textarea class="builder__code" v-model="snippet"></textarea>
+      <textarea
+        class="builder__code"
+        v-model="snippet"
+        v-if="showCode"
+      ></textarea>
     </div>
-    <form class="builder__instruction" @submit.prevent="apply">
+    <form
+      class="builder__instruction"
+      @submit.prevent="onApply"
+      v-if="showConsole"
+    >
       <textarea
         :rows="height"
         class="builder__input"
@@ -39,152 +85,66 @@
       >
         <span class="material-icons">undo</span>
       </button>
-      <button
-        :disabled="!(snippet.length || history.length)"
-        class="builder__btn builder__btn-secondary"
-        :class="[(saving && 'animate-pulse') || '']"
-        type="button"
-        @click="save"
-      >
-        <span class="material-icons">save</span>
-      </button>
-      <button
-        :disabled="!(snippet.length || history.length)"
-        class="builder__btn builder__btn-secondary"
-        :class="[(publishing && 'animate-pulse') || '']"
-        type="button"
-        @click="publish"
-      >
-        <span class="material-icons">publish</span>
-      </button>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import Preview from './Preview.vue';
+import { computed, onMounted } from "vue";
+import Selector from "./Selector.vue";
+import { select, dispatch } from "./state.js";
+import {
+  HistoryLoadAction,
+  HistorySaveAction,
+  SetLayoutAction,
+  UndoAction,
+  UpdateAction,
+  ViewportSizeAction,
+} from "./actions";
 
-type HistoryEntry = {
-  message: string;
-  snippet: string;
-};
-
-const input = ref("");
-const snippet = ref("");
-const history = ref<Array<HistoryEntry>>([]);
-const running = ref(false);
-const publishing = ref(false);
-const saving = ref(false);
+const viewportSize = select((s) => s.viewportSize);
+const viewportSizes = select((s) => s.viewportSizes);
+const layoutOptions = select((s) => s.layoutOptions);
+const layout = select((s) => s.layout);
+const showCode = select((s) => s.showCode);
+const showConsole = select((s) => s.showConsole);
+const history = select((s) => s.history);
+const input = select((s) => s.input);
+const snippet = select((s) => s.snippet);
+const running = select((s) => s.running);
+const publishing = select((s) => s.publishing);
+const saving = select((s) => s.saving);
 const height = computed(() => input.value.split("\n").length);
-const url = new URL(window.location.href);
-const componentId = url.searchParams.get("id") || url.pathname.replace('/edit/', '');
-const previewWidth = ref("100%");
 
-function setWidth(value) {
-  previewWidth.value = value;
+function setWidth(value: string) {
+  dispatch(new ViewportSizeAction(value));
 }
 
-async function load() {
-  if (!componentId) {
-    return;
-  }
-
-  const state = await fetch("/components/" + componentId);
-  const json = await state.json();
-
-  history.value = json.history || [];
-  snippet.value = json.snippet || "";
-  input.value = json.input || "";
+function setLayout(value: string) {
+  dispatch(new SetLayoutAction(value));
 }
 
 async function save() {
-  if (!componentId) {
-    return;
-  }
-
-  try {
-    saving.value = true;
-    await fetch("/components/" + componentId, {
-      method: "POST",
-      body: JSON.stringify({
-        history: history.value,
-        snippet: snippet.value,
-        input: input.value,
-      }),
-    });
-  } finally {
-    saving.value = false;
-  }
-}
-
-async function publish() {
-  if (!componentId) {
-    return;
-  }
-
-  if (!confirm("Sure?")) {
-    return;
-  }
-
-  try {
-    publishing.value = true;
-    await fetch("/publish/" + componentId, { method: "POST" });
-  } finally {
-    publishing.value = true;
-  }
+  dispatch(new HistorySaveAction(null));
 }
 
 async function undo() {
-  const list = history.value;
-
-  if (!list.length) {
-    return;
-  }
-
-  const previous = list.pop()!;
-  snippet.value = previous.snippet;
-  input.value = previous.message;
-  running.value = false;
+  dispatch(new UndoAction(null));
 }
 
-async function apply() {
-  running.value = true;
-
-  try {
-    const body = JSON.stringify({
-      history: history.value.map((h) => h.message),
-      code: snippet.value,
-      instruction: input.value,
-    });
-
-    const req = await fetch("/run", { method: "POST", body });
-    const code = await req.text();
-
-    if (code) {
-      snippet.value = sanitize(code);
-      history.value.push({ snippet: snippet.value, message: input.value });
-    }
-
-    input.value = "";
-  } finally {
-    running.value = false;
-  }
+async function onPublish() {
+  dispatch(new UndoAction(null));
 }
 
-function sanitize(code) {
-  if (code.trim().includes("```")) {
-    return code.replaceAll("```html", "").replaceAll("```", "");
-  }
-
-  return code;
+async function onApply() {
+  dispatch(new UpdateAction(null));
 }
 
 function onKeyUp(event: KeyboardEvent) {
   if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-    apply();
+    dispatch(new UpdateAction(null));
   }
 }
 
-onMounted(load);
+onMounted(() => dispatch(new HistoryLoadAction(null)));
 </script>
