@@ -1,7 +1,7 @@
 import {
   HistorySaveAction,
   HistorySavedAction,
-  ViewportSizeAction,
+  SetViewportSizeAction,
   HistoryLoadedAction,
   UndoAction,
   HistoryLoadAction,
@@ -9,7 +9,7 @@ import {
   UpdateAction,
   UpdateCompletedAction,
   PublishAction,
-SetLayoutAction,
+  SetLayoutAction,
 } from "./actions";
 
 import { reduce, dispatch, set } from "./state";
@@ -28,15 +28,15 @@ reduce(HistorySaveAction, async (state) => {
 });
 
 reduce(SetLayoutAction, (_, action) => set("layout", action.payload));
+reduce(SetViewportSizeAction, (_, action) =>
+  set("viewportSize", action.payload)
+);
+
 reduce(HistorySaveAction, () => set("saving", true));
 reduce(HistorySavedAction, () => set("saving", false));
 reduce(HistoryLoadedAction, (state, action) => {
   const { history = [], snippet = "", input = "" } = action.payload;
   return Object.assign({}, state, { history, snippet, input });
-});
-
-reduce(ViewportSizeAction, (state, action) => {
-  return { ...state, viewportSize: action.payload };
 });
 
 reduce(PublishAction, async function (state) {

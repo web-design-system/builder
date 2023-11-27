@@ -1,16 +1,20 @@
 import { useState } from "./useState";
-import { HistoryEntry, ViewportSizeAction, SetLayoutAction } from "./actions";
+import {
+  HistoryEntry,
+  SetViewportSizeAction,
+  SetLayoutAction,
+} from "./actions";
 
 const { select, set, reduce, dispatch } = useState({
   layoutOptions: Object.entries(SetLayoutAction.layouts).map(([a, b]) => ({
     value: b,
     label: a,
   })),
-  viewportSizes: Object.entries(ViewportSizeAction.sizes).map(([a, b]) => ({
+  viewportSizes: Object.entries(SetViewportSizeAction.sizes).map(([a, b]) => ({
     value: b,
     label: a,
   })),
-  viewportSize: ViewportSizeAction.sizes.full,
+  viewportSize: SetViewportSizeAction.sizes.full,
   layout: SetLayoutAction.layouts.both,
   showCode: true,
   showConsole: true,

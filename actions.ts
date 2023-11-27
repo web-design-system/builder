@@ -13,7 +13,7 @@ export class ApplyUpdateAction extends Action<string> {
   static readonly type = "code:update";
 }
 
-export class ViewportSizeAction extends Action<string> {
+export class SetViewportSizeAction extends Action<string> {
   static readonly type = "viewport:size";
   static readonly sizes = {
     sm: "640px",

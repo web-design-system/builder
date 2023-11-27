@@ -66,6 +66,7 @@
           layout === SetLayoutAction.layouts.both ||
           layout === SetLayoutAction.layouts.code
         "
+        @change="onSnippetUpdate"
       ></textarea>
     </div>
     <form class="builder__instruction" @submit.prevent="onApply">
@@ -98,14 +99,15 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import Selector from "./Selector.vue";
-import { select, dispatch } from "./state.js";
+import { select, dispatch, set } from "./state.js";
 import {
   HistoryLoadAction,
   HistorySaveAction,
   SetLayoutAction,
   UndoAction,
   UpdateAction,
-  ViewportSizeAction,
+  SetViewportSizeAction,
+  PublishAction,
 } from "./actions";
 import "./effects.js";
 
@@ -122,7 +124,7 @@ const saving = select((s) => s.saving);
 const height = computed(() => input.value.split("\n").length);
 
 function setWidth(value: string) {
-  dispatch(new ViewportSizeAction(value));
+  dispatch(new SetViewportSizeAction(value));
 }
 
 function setLayout(value: string) {
@@ -130,26 +132,30 @@ function setLayout(value: string) {
 }
 
 async function save() {
-  dispatch(new HistorySaveAction(null));
+  dispatch(new HistorySaveAction());
 }
 
 async function undo() {
-  dispatch(new UndoAction(null));
+  dispatch(new UndoAction());
 }
 
 async function onPublish() {
-  dispatch(new UndoAction(null));
+  dispatch(new PublishAction());
+}
+
+async function onSnippetUpdate() {
+  set("snippet", snippet.value);
 }
 
 async function onApply() {
-  dispatch(new UpdateAction(null));
+  dispatch(new UpdateAction());
 }
 
 function onKeyUp(event: KeyboardEvent) {
   if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-    dispatch(new UpdateAction(null));
+    dispatch(new UpdateAction());
   }
 }
 
-onMounted(() => dispatch(new HistoryLoadAction(null)));
+onMounted(() => dispatch(new HistoryLoadAction()));
 </script>
