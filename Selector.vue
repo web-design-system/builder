@@ -16,7 +16,7 @@
 <script setup>
 const props = defineProps({
   options: { type: Array },
-  value: { type: string },
+  value: { type: String },
 });
 
 const emit = defineEmits(["select"]);
