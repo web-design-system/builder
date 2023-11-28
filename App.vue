@@ -1,29 +1,7 @@
 <template>
   <div class="builder">
     <div class="builder__toolbar">
-      <span class="btn-group">
-        <button
-          class="btn-icon"
-          title="Save"
-          :disabled="!(snippet.length || history.length)"
-          :class="[(saving && 'animate-pulse') || '']"
-          type="button"
-          @click="save"
-        >
-          <span class="material-icons">save</span>
-        </button>
-
-        <button
-          class="btn-icon"
-          title="Publish"
-          :disabled="!(snippet.length || history.length)"
-          :class="[(publishing && 'animate-pulse') || '']"
-          type="button"
-          @click="onPublish"
-        >
-          <span class="material-icons">publish</span>
-        </button>
-      </span>
+      <Toolbar @run="onActionRun" :actions="toolbarActions" />
 
       <Selector
         @select="setWidth($event)"
@@ -99,6 +77,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import Selector from "./Selector.vue";
+import Toolbar from "./Toolbar.vue";
 import { select, dispatch, set } from "./state.js";
 import {
   HistoryLoadAction,
@@ -123,24 +102,41 @@ const publishing = select((s) => s.publishing);
 const saving = select((s) => s.saving);
 const height = computed(() => input.value.split("\n").length);
 
+const toolbarActions = computed(() => [
+  {
+    id: "save",
+    label: "Save",
+    icon: "save",
+    action: HistorySaveAction,
+    busy: saving.value,
+    disabled: !(snippet.value.length || history.value.length),
+  },
+  {
+    id: "publish",
+    label: "Publish",
+    icon: "publish",
+    action: PublishAction,
+    busy: publishing.value,
+    disabled: !(snippet.value.length || history.value.length),
+  },
+  {
+    id: 'undo',
+    label: "",
+    icon: "undo",
+    action: UndoAction,
+  },
+]);
+
+function onActionRun(action) {
+  dispatch(new action.action());
+}
+
 function setWidth(value: string) {
   dispatch(new SetViewportSizeAction(value));
 }
 
 function setLayout(value: string) {
   dispatch(new SetLayoutAction(value));
-}
-
-async function save() {
-  dispatch(new HistorySaveAction());
-}
-
-async function undo() {
-  dispatch(new UndoAction());
-}
-
-async function onPublish() {
-  dispatch(new PublishAction());
 }
 
 async function onSnippetUpdate() {
